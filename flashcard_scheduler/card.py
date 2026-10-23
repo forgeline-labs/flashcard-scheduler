@@ -1,5 +1,7 @@
 """The :class:`Card` value object."""
 
+import math
+
 from .dates import is_valid_date
 from .errors import DeckFormatError
 
@@ -9,7 +11,17 @@ _REQUIRED_FIELDS = ("card_id", "front", "back")
 def _as_float(value, field):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise DeckFormatError("invalid value for {}: {!r}".format(field, value))
-    return float(value)
+    try:
+        number = float(value)
+    except OverflowError:
+        raise DeckFormatError(
+            "invalid value for {}: {!r}".format(field, value)
+        ) from None
+    if not math.isfinite(number):
+        # ``json`` accepts non-standard literals such as ``1e999`` (``inf``);
+        # they cannot be scheduled and are therefore a format error.
+        raise DeckFormatError("invalid value for {}: {!r}".format(field, value))
+    return number
 
 
 def _as_int(value, field):

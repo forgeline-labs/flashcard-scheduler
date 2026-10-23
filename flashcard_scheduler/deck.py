@@ -35,14 +35,16 @@ class Deck:
         if not isinstance(data["cards"], list):
             raise DeckFormatError("invalid value for cards")
 
-        cards = []
+        # Validate every card before checking for duplicates so that a format
+        # error (exit 2) takes precedence over a duplicate id (exit 1), as
+        # documented by the exit-code precedence ``2 > 1 > 0``.
+        cards = [Card.from_dict(raw_card) for raw_card in data["cards"]]
+
         seen = set()
-        for raw_card in data["cards"]:
-            card = Card.from_dict(raw_card)
+        for card in cards:
             if card.card_id in seen:
                 raise DuplicateCardIdError(card.card_id)
             seen.add(card.card_id)
-            cards.append(card)
         return cls(name=data["name"], cards=cards)
 
     def find(self, card_id):

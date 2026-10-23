@@ -7,7 +7,7 @@ spacing, or alternative schedulers exist in v0.1.
 import math
 
 from .dates import add_days, parse_date
-from .errors import InvalidGradeError
+from .errors import InvalidGradeError, ScheduleError
 
 MIN_EF = 1.3
 INITIAL_EF = 2.5
@@ -60,6 +60,8 @@ def review_card(card, grade, reference_date):
 
     new_ef = old_ef + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02))
     new_ef = max(MIN_EF, round(new_ef, _EF_PRECISION))
+    if not math.isfinite(new_ef):
+        raise ScheduleError("ef out of range: {!r}".format(card.ef))
 
     if new_reps == 0 or old_reps == 0:
         new_interval = 1
@@ -68,7 +70,15 @@ def review_card(card, grade, reference_date):
     elif new_reps == 2:
         new_interval = 6
     else:
-        new_interval = max(1, int(math.ceil(old_interval * old_ef)))
+        try:
+            raw_interval = old_interval * old_ef
+            if not math.isfinite(raw_interval):
+                raise ScheduleError("interval out of range: {!r}".format(card.interval))
+            new_interval = max(1, int(math.ceil(raw_interval)))
+        except OverflowError:
+            raise ScheduleError(
+                "interval out of range: {!r}".format(card.interval)
+            ) from None
 
     updated = card.copy()
     updated.ef = new_ef

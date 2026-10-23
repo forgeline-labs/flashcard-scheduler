@@ -63,6 +63,12 @@ class StorageError(FlashcardError):
     exit_code = 2
 
 
+class ScheduleError(FlashcardError):
+    """A scheduling computation exceeds the supported numeric/date range."""
+
+    exit_code = 2
+
+
 class DuplicateCardIdError(FlashcardError):
     """A deck contains two cards with the same ``card_id``."""
 

@@ -9,7 +9,7 @@ an ISO 8601 ``YYYY-MM-DD`` string.  Dates are stored and compared as strings
 import datetime
 import re
 
-from .errors import InvalidDateError
+from .errors import InvalidDateError, ScheduleError
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -40,5 +40,14 @@ def is_valid_date(value):
 
 
 def add_days(value, days):
-    """Return ``value + days`` as a ``YYYY-MM-DD`` string."""
-    return (parse_date(value) + datetime.timedelta(days=days)).isoformat()
+    """Return ``value + days`` as a ``YYYY-MM-DD`` string.
+
+    Raises :class:`ScheduleError` (exit ``2``) when the result falls outside
+    the calendar supported by :mod:`datetime`.
+    """
+    try:
+        return (parse_date(value) + datetime.timedelta(days=days)).isoformat()
+    except OverflowError:
+        raise ScheduleError(
+            "date out of range: {} + {} days".format(value, days)
+        ) from None

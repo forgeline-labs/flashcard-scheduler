@@ -240,7 +240,7 @@ def main(argv=None):
     except FlashcardError as error:
         sys.stderr.write("error: {}\n".format(error.message))
         return error.exit_code
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, OverflowError) as error:
         sys.stderr.write("error: {}\n".format(error))
         return 2
 
