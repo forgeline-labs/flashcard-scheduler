@@ -1,6 +1,9 @@
 """Deck model, due-card queries, statistics, and JSON file storage."""
 
 import json
+import os
+import stat
+import tempfile
 
 from .card import Card
 from .dates import parse_date
@@ -136,12 +139,31 @@ def load_deck(filepath):
 
 
 def save_deck(deck, filepath):
-    """Write *deck* to *filepath* as pretty-printed UTF-8 JSON."""
+    """Commit a UTF-8 deck only after writing and syncing a sibling temporary."""
     payload = json.dumps(deck.to_dict(), indent=2, ensure_ascii=False) + "\n"
+    target = os.path.abspath(filepath)
+    temporary = None
     try:
-        with open(filepath, "w", encoding="utf-8") as handle:
+        # Atomic replacement must still respect a deliberately read-only deck.
+        mode = stat.S_IMODE(os.stat(target).st_mode) if os.path.exists(target) else None
+        if mode is not None and not mode & 0o222:
+            raise PermissionError("read-only deck")
+        descriptor, temporary = tempfile.mkstemp(dir=os.path.dirname(target), prefix=".deck-")
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
             handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        if mode is not None:
+            os.chmod(temporary, mode)
+        os.replace(temporary, target)
+        temporary = None
     except PermissionError:
         raise StorageError("permission denied: {}".format(filepath)) from None
     except OSError:
         raise StorageError("cannot write file: {}".format(filepath)) from None
+    finally:
+        if temporary is not None:
+            try:
+                os.unlink(temporary)
+            except OSError:
+                pass

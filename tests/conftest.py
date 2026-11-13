@@ -26,6 +26,7 @@ def app():
             cwd=str(cwd or ROOT),
             capture_output=True,
             text=True,
+            encoding="utf-8",
             timeout=timeout,
         )
 

@@ -12,6 +12,7 @@ def _skip_if_root():
         pytest.skip("running as root: permission bits are not enforced")
 
 
+@pytest.mark.skipif(os.name == "nt", reason="chmod cannot remove Windows read ACLs")
 def test_ac_19_unreadable_deck(app, write_deck, card_factory):
     _skip_if_root()
     deck_path = write_deck({"name": "Locked", "cards": [card_factory("a")]})
