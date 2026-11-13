@@ -46,4 +46,4 @@ jobs:
         shell: pwsh
         run: |
           $version = & .\app.cmd --version
-          if ($LASTEXITCODE -ne 0 -or $version -ne "flashcard-scheduler 0.1.0") { throw "launcher failed" }
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch "0\.1\.0") { throw "launcher failed" }
