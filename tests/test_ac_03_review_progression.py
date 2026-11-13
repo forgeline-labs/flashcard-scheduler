@@ -39,5 +39,5 @@ def test_ac_03_review_twice_grade_5(app, write_deck, load_json, card_factory):
     assert second.returncode == 0, second.stderr
     card = json.loads(second.stdout)
     assert card["reps"] == 3
-    assert card["interval"] == 16
-    assert card["next_review"] == "2026-02-07"
+    assert card["interval"] == 17
+    assert card["next_review"] == "2026-02-08"

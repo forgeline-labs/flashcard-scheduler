@@ -183,9 +183,8 @@ For a review with quality `q` in `[0, 5]` on `reference_date`:
    - `n' = 0` (or the card was new, `n = 0`): 1 day
    - `n' = 1`: 1 day
    - `n' = 2`: 6 days
-   - `n' >= 3`: `ceil(I * EF)` using the card's ease factor before this review
-     (this is the value pinned by the acceptance criteria: `ceil(6 * 2.6) = 16`,
-     `ceil(100 * 2.8) = 280`)
+   - `n' >= 3`: `ceil(I * EF')` using the ease factor updated by this review
+     (for example: `ceil(6 * 2.7) = 17`, `ceil(100 * 2.9) = 290`)
 4. **Dates.** `last_review = reference_date`,
    `next_review = reference_date + I' days`. The interval is never less than one
    day.

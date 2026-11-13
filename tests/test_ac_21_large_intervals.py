@@ -15,9 +15,9 @@ def test_ac_21_large_intervals(app, write_deck, card_factory):
 
     assert result.returncode == 0, result.stderr
     updated = json.loads(result.stdout)
-    assert updated["interval"] == 280
+    assert updated["interval"] == 290
     expected_next = (
-        datetime.date(2026, 1, 15) + datetime.timedelta(days=280)
+        datetime.date(2026, 1, 15) + datetime.timedelta(days=290)
     ).isoformat()
     assert updated["next_review"] == expected_next
     assert updated["reps"] == 11

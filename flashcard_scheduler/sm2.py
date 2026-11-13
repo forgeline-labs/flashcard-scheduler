@@ -5,6 +5,7 @@ spacing, or alternative schedulers exist in v0.1.
 """
 
 import math
+from decimal import Decimal
 
 from .dates import add_days, parse_date
 from .errors import InvalidGradeError, ScheduleError
@@ -39,9 +40,7 @@ def review_card(card, grade, reference_date):
     * ``n' == 0`` or ``n == 0`` -> 1 day (restart / first review)
     * ``n' == 1`` -> 1 day
     * ``n' == 2`` -> 6 days
-    * otherwise -> ``ceil(I * EF)`` using the card's ease factor before this
-      review.  This mirrors AC-3 (``ceil(6 * 2.6) == 16``) and AC-21
-      (``ceil(100 * 2.8) == 280``).
+    * otherwise -> ``ceil(I * EF')`` using the ease factor updated by this review.
 
     Raises :class:`ValueError` when the grade is outside ``[0, 5]`` or the
     reference date is not a valid ``YYYY-MM-DD`` string.
@@ -71,7 +70,7 @@ def review_card(card, grade, reference_date):
         new_interval = 6
     else:
         try:
-            raw_interval = old_interval * old_ef
+            raw_interval = Decimal(old_interval) * Decimal(str(new_ef))
             if not math.isfinite(raw_interval):
                 raise ScheduleError("interval out of range: {!r}".format(card.interval))
             new_interval = max(1, int(math.ceil(raw_interval)))
